@@ -1,0 +1,5 @@
+{
+  "name": "PPAC Course Scheduler",
+  "description": "A 10-week cycle course schedule for PPAC program with automated session distribution.",
+  "requestFramePermissions": []
+}
