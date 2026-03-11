@@ -22,78 +22,67 @@ import {
 } from 'lucide-react';
 import { COURSES, DAYS, WEEKS, SLOTS_PER_DAY, SLOT_TIMES, UI_TEXT, Course } from './constants';
 
-// Highly specific deterministic schedule generator based on user constraints
+// Highly specific deterministic schedule generator based on user provided Excel/PDF
 const generateInitialSchedule = () => {
   const schedule: (string | null)[][][] = Array.from({ length: WEEKS }, () =>
     Array.from({ length: DAYS.length }, () => Array(SLOTS_PER_DAY).fill(null))
   );
 
-  const placeCourse = (courseId: string, startWeek: number, endWeek: number, totalSessions: number) => {
-    let placed = 0;
-    const isEnglish = courseId === 'ae';
+  // Week 1 & 2 are identical
+  [0, 1].forEach(w => {
+    // Morning
+    for (let d = 0; d < 4; d++) schedule[w][d][0] = 'ae';
+    // Afternoon
+    schedule[w][0][1] = 'ai';
+    schedule[w][1][1] = 'pcs';
+    schedule[w][2][1] = 'aw';
+    schedule[w][3][1] = 'ai';
+  });
 
-    for (let w = startWeek - 1; w < endWeek; w++) {
-      const weeksLeft = endWeek - w;
-      const sessionsThisWeek = Math.ceil((totalSessions - placed) / weeksLeft);
-      
-      let weekPlaced = 0;
-      for (let d = 0; d < 4 && weekPlaced < sessionsThisWeek && placed < totalSessions; d++) {
-        if (schedule[w][d].includes(courseId)) continue;
-        const sessionsToday = schedule[w][d].filter(id => id !== null).length;
-        if (sessionsToday >= 2) continue;
+  // Week 3 & 4 are identical
+  [2, 3].forEach(w => {
+    // Morning
+    for (let d = 0; d < 4; d++) schedule[w][d][0] = 'ae';
+    // Afternoon
+    schedule[w][0][1] = 'ci';
+    schedule[w][1][1] = 'pcs';
+    schedule[w][2][1] = 'aw';
+    schedule[w][3][1] = 'ci';
+    // Evening
+    schedule[w][4][2] = 'awp';
+  });
 
-        if (isEnglish) {
-          if (schedule[w][d][0] === null) {
-            schedule[w][d][0] = courseId;
-            placed++;
-            weekPlaced++;
-          }
-        } else {
-          for (let s = 1; s < SLOTS_PER_DAY && weekPlaced < sessionsThisWeek && placed < totalSessions; s++) {
-            if (schedule[w][d][s] === null) {
-              schedule[w][d][s] = courseId;
-              placed++;
-              weekPlaced++;
-              break;
-            }
-          }
-        }
-      }
+  // Week 5
+  const w5 = 4;
+  for (let d = 0; d < 4; d++) schedule[w5][d][0] = 'ae';
+  schedule[w5][0][1] = 'ct';
+  schedule[w5][1][1] = 'pcs';
+  schedule[w5][2][1] = 'aw';
+  schedule[w5][3][1] = 'ct';
+  schedule[w5][4][2] = 'awp';
 
-      if (weekPlaced < sessionsThisWeek && placed < totalSessions) {
-        const d = 4;
-        if (!schedule[w][d].includes(courseId)) {
-          const sessionsToday = schedule[w][d].filter(id => id !== null).length;
-          if (sessionsToday < 2) {
-            if (isEnglish) {
-              if (schedule[w][d][0] === null) {
-                schedule[w][d][0] = courseId;
-                placed++;
-                weekPlaced++;
-              }
-            } else {
-              for (let s = 1; s < SLOTS_PER_DAY && weekPlaced < sessionsThisWeek && placed < totalSessions; s++) {
-                if (schedule[w][d][s] === null) {
-                  schedule[w][d][s] = courseId;
-                  placed++;
-                  weekPlaced++;
-                  break;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  };
+  // Week 6, 7, 8 are identical
+  [5, 6, 7].forEach(w => {
+    // Morning
+    for (let d = 0; d < 3; d++) schedule[w][d][0] = 'ae';
+    // Afternoon
+    schedule[w][0][1] = 'ct';
+    schedule[w][1][1] = 'pcs';
+    schedule[w][2][1] = 'aw';
+    schedule[w][3][1] = 'ct';
+    // Evening
+    schedule[w][4][2] = 'awp';
+  });
 
-  placeCourse('ae', 1, 9, 32);
-  placeCourse('ai', 1, 2, 4);
-  placeCourse('ci', 3, 4, 4);
-  placeCourse('pcs', 1, 4, 8);
-  placeCourse('aw', 1, 8, 8);
-  placeCourse('ct', 5, 9, 8);
-  placeCourse('awp', 3, 10, 9);
+  // Week 9
+  const w9 = 8;
+  for (let d = 0; d < 3; d++) schedule[w9][d][0] = 'ae';
+  schedule[w9][4][2] = 'awp';
+
+  // Week 10
+  const w10 = 9;
+  schedule[w10][0][1] = 'awp';
+  schedule[w10][1][1] = 'awp';
 
   return schedule;
 };
